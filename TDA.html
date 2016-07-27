@@ -1,0 +1,53 @@
+<html>
+
+<head>
+<script src="require.js"></script>
+<script src="TDA.js"></script>
+<script src="ripser/ripser.js"></script>
+</head>
+<table>
+<tr><td><h3>Point Cloud File</h3></td><td><input type="file" id="pcInput"></td></tr>
+</table>
+
+
+
+<h2><p id = "pagestatus"></p></h2>
+
+
+<script>
+    var fileInput = document.getElementById('pcInput');
+
+	fileInput.addEventListener('change', function(e) {
+		var file = fileInput.files[0];
+		var textType = /text.*/;
+
+		if (file.type.match(textType)) {
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				//console.log(reader.result);
+				var lines = reader.result.split(/[\r\n]+/g);
+				var Ps = [];
+				for (var i = 0; i < lines.length; i++) {
+				    if (lines[i].length == 0) {
+				        break;
+				    }
+				    fields = lines[i].split(" ");
+				    for (var k = 0; k < fields.length; k++) {
+				        fields[k] = parseFloat(fields[k]);
+				    }
+				    //fields = ndarray(fields);
+				    console.log(fields);
+				    Ps.push(fields);
+				}
+				getD(Ps);
+			}
+			reader.readAsText(file);	
+		} else {
+			result.innerHTML = "File not supported!"
+		}
+	});
+</script>
+
+
+</body>
+</html>
