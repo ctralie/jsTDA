@@ -15,8 +15,13 @@
 <tr><td><h3>Point Cloud File</h3></td><td><input type="file" id="pcInput"></td></tr>
 </table>
 
+Click "browse" and upload a plain text file which contains a Euclidean point cloud, with each point on a line with each coordinate separated by spaces.  Examples include <a href = "PCExamples/Circle50.txt">Circle50.txt</a> and <a href = "PCExamples/Torus200.txt">Torus200.txt</a>.  The rips filtration will be computed up to edge lengths bounded by the distance cutoff, and diagrams will be shown for all dimensions from 0 up to the maximum homological dimension specified (capped at 3).
+
+<HR>
+
 <p id = "time"></p>
 
+<p id = "PointCloud"></p>
 <p id = "H0"></p>
 <p id = "H1"></p>
 <p id = "H2"></p>
@@ -51,6 +56,14 @@
 				    }
 				    Ps.push(fields);
 				}
+				//Plot point cloud
+				if (Ps[0].length == 2) {
+				    plotPC2D(Ps, "PointCloud");
+				}
+				else if (Ps[0].length == 3) {
+				    plotPC3D(Ps, "PointCloud");
+				}
+				
 				var cutoff = parseFloat(document.getElementById("dcutoff").value);
 				var homdim = parseInt(document.getElementById("homdim").value);
 				var ret = getRipsDGMs(Ps, cutoff, homdim);

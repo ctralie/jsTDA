@@ -47,3 +47,42 @@ function getRipsDGMs(Ps, cutoff, dimMax) {
     
     return {'dgms':dgmsRet, 'elapsed':elapsed};
 }
+
+function plotPC2D(Ps, documentElem) {
+    xp = [];
+    yp = [];
+    for (var i = 0; i < Ps.length; i++) {
+        xp.push(Ps[i][0]);
+        yp.push(Ps[i][1]);
+    }
+    var points = {x:xp, y:yp, mode:'markers', name:'points'};
+    var layout = {
+      autosize: false, width: 500, height: 500,
+      margin: { l: 0, r: 0, b: 0, t: 65, title:'Point Cloud' }
+    };
+    Plotly.newPlot(documentElem, [points], layout);
+}
+
+function plotPC3D(Ps, documentElem) {
+    xp = [];
+    yp = [];
+    zp = [];
+    for (var i = 0; i < Ps.length; i++) {
+        xp.push(Ps[i][0]);
+        yp.push(Ps[i][1]);
+        zp.push(Ps[i][2]);
+    }
+    var scatterplot = { x: xp, y: yp, z: zp,             
+      type: 'scatter3d', name: 'Point Cloud',
+              mode: 'markers',
+        marker: {
+         color: 'rgb(0, 0, 200)',      
+         size: 2,
+        }
+    };
+    var layout = {
+      autosize: false, width: 500, height: 500,
+      margin: { l: 0, r: 0, b: 0, t: 65, title:'Point Cloud' }
+    };
+    Plotly.newPlot(documentElem, [scatterplot], layout); 
+}
