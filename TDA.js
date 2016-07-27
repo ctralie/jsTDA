@@ -1,6 +1,8 @@
 //var distance = require("ndarray-distance")
 //var ndarray = require("ndarray")
 
+//Get lower triangular Euclidean distance matrix
+//(TODO: Speed this up with matrix multiplication
 function getD(Ps) {
     var N = Ps.length;
     var D = new Module.VectorFloat();
@@ -14,5 +16,34 @@ function getD(Ps) {
             D.push_back(Math.sqrt(d));
         }
     }
-    Module.ripserJS(D, N, 1000, 1);
+    return D;
+}
+
+function getRipsDGMs(Ps, cutoff, dimMax) {
+    var N = Ps.length;
+    var D = getD(Ps);
+    var dgms = new Module.VectorVectorFloat();
+    tic = (new Date()).getTime();
+    Module.ripserJS(D, N, cutoff, dimMax, dgms);
+    toc = (new Date()).getTime();
+    var elapsed = (toc - tic)/1000.0;
+    
+    var dgmsRet = [];
+    for (var i = 0; i < dgms.size()/2; i++) {
+        var bptr = dgms.get(i*2);
+        var dptr = dgms.get(i*2+1);
+        var b = [];
+        var d = [];
+        for (var j = 0; j < bptr.size(); j++) {
+            b.push(bptr.get(j));
+            d.push(dptr.get(j));
+        }
+        dgmsRet.push({'births':b, 'deaths':d});
+    }
+    
+    //Clean up allocated memory
+    D.delete();
+    dgms.delete();
+    
+    return {'dgms':dgmsRet, 'elapsed':elapsed};
 }

@@ -1,22 +1,33 @@
 <html>
 
 <head>
-<script src="require.js"></script>
 <script src="TDA.js"></script>
+<script src="plotly.min.js"></script>
 <script src="ripser/ripser.js"></script>
+
 </head>
 <table>
+<tr><td><h3>Distance Cutoff</h3></td><td><input type="text" id = "dcutoff" size="5"></input></td></tr>
+<tr><td><h3>Max Homological Dimension</h3></td><td><input type="text" id = "homdim" size="5"></input></td></tr>
 <tr><td><h3>Point Cloud File</h3></td><td><input type="file" id="pcInput"></td></tr>
 </table>
 
+<p id = "time"></p>
+
+<p id = "H0"></p>
+<p id = "H1"></p>
+<p id = "H2"></p>
+<p id = "H3"></p>
 
 
-<h2><p id = "pagestatus"></p></h2>
 
 
 <script>
-    var fileInput = document.getElementById('pcInput');
+    document.getElementById("dcutoff").value = "100";
+    document.getElementById("homdim").value = "1";
 
+    var fileInput = document.getElementById('pcInput');
+    
 	fileInput.addEventListener('change', function(e) {
 		var file = fileInput.files[0];
 		var textType = /text.*/;
@@ -35,11 +46,23 @@
 				    for (var k = 0; k < fields.length; k++) {
 				        fields[k] = parseFloat(fields[k]);
 				    }
-				    //fields = ndarray(fields);
-				    console.log(fields);
 				    Ps.push(fields);
 				}
-				getD(Ps);
+				var cutoff = parseFloat(document.getElementById("dcutoff").value);
+				var homdim = parseInt(document.getElementById("homdim").value);
+				var ret = getRipsDGMs(Ps, cutoff, homdim);
+				var dgms = ret.dgms;
+				var elapsed = ret.elapsed;
+				document.getElementById("time").innerHTML = "Elapsed Time: " + elapsed + " seconds";
+				for (var i = 0; i < dgms.length; i++) {
+				    var dgmPoints = {x:dgms[i].births, y:dgms[i].deaths, mode:'markers', name:'points'};
+				    var axMin = Math.min(Math.min.apply(null, dgms[i].births), Math.min.apply(null, dgms[i].deaths));
+                    var axMax = Math.max(Math.max.apply(null, dgms[i].births), Math.max.apply(null, dgms[i].deaths));
+                    var axRange = axMax - axMin;
+				    var diagonal = {x:[axMin-axRange/5, axMax+axRange/5], y:[axMin-axRange/5, axMax+axRange/5], mode:'scatter', name:'diagonal'};
+				    var layout = {title:'H'+i};
+				    Plotly.newPlot('H'+i, [dgmPoints, diagonal], layout);
+				}
 			}
 			reader.readAsText(file);	
 		} else {
