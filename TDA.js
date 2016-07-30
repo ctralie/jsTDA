@@ -48,6 +48,60 @@ function getRipsDGMs(Ps, cutoff, dimMax) {
     return {'dgms':dgmsRet, 'elapsed':elapsed};
 }
 
+
+function doComputation(Ps) {
+	var cutoff = parseFloat(document.getElementById("dcutoff").value);
+	var homdim = parseInt(document.getElementById("homdim").value);
+	var ret = getRipsDGMs(Ps, cutoff, homdim);
+	var dgms = ret.dgms;
+	var elapsed = ret.elapsed;
+	document.getElementById("time").innerHTML = "Elapsed Time: " + elapsed + " seconds";
+	for (var i = 0; i < dgms.length; i++) {
+	    var dgmPoints = {x:dgms[i].births, y:dgms[i].deaths, mode:'markers', name:'points'};
+	    var axMin = Math.min(Math.min.apply(null, dgms[i].births), Math.min.apply(null, dgms[i].deaths));
+        var axMax = Math.max(Math.max.apply(null, dgms[i].births), Math.max.apply(null, dgms[i].deaths));
+        var axRange = axMax - axMin;
+	    var diagonal = {x:[axMin-axRange/5, axMax+axRange/5], y:[axMin-axRange/5, axMax+axRange/5], mode:'scatter', name:'diagonal'};
+	    var layout = {title:'H'+i};
+	    Plotly.newPlot('H'+i, [dgmPoints, diagonal], layout);
+	}
+	return ret.dgms;
+}
+
+//https://thiscouldbebetter.wordpress.com/2012/12/18/loading-editing-and-saving-a-text-file-in-html5-using-javascrip/
+function saveResults()
+{
+    if (dgms.length == 0) {
+        alert("Need to load in a point cloud first!");
+        return;
+    }
+    var textToSave = "";
+    for (var i = 0; i < dgms.length; i++) {
+        textToSave += (i + "\n");
+        for (var k = 0; k < dgms[i].births.length; k++) {
+            textToSave += dgms[i].births[k] + " " + dgms[i].deaths[k] + "\n";
+        }
+        textToSave += "\n\n";
+    }
+    var textToSaveAsBlob = new Blob([textToSave], {type:"text/plain"});
+    var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+ 
+    var downloadLink = document.createElement("a");
+    downloadLink.download = "results.txt";
+    downloadLink.innerHTML = "Download File";
+    downloadLink.href = textToSaveAsURL;
+    downloadLink.onclick = destroyClickedElement;
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+ 
+    downloadLink.click();
+}
+
+function destroyClickedElement(event)
+{
+    document.body.removeChild(event.target);
+}
+
 function plotPC2D(Ps, documentElem) {
     xp = [];
     yp = [];

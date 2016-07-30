@@ -19,8 +19,11 @@ Click "browse" and upload a plain text file which contains a Euclidean point clo
 
 <HR>
 
-<p id = "time"></p>
+<table>
+<tr><td><button onclick="recompute()">Recompute</button></td><td><button onclick="saveResults()">Save Results</button></td></tr>
+</table>
 
+<p id = "time"></p>
 <p id = "PointCloud"></p>
 <p id = "H0"></p>
 <p id = "H1"></p>
@@ -33,7 +36,9 @@ Click "browse" and upload a plain text file which contains a Euclidean point clo
 <script>
     document.getElementById("dcutoff").value = "100";
     document.getElementById("homdim").value = "1";
-
+    
+    var dgms = {};
+    var Ps = [];
     var fileInput = document.getElementById('pcInput');
     
 	fileInput.addEventListener('change', function(e) {
@@ -45,7 +50,7 @@ Click "browse" and upload a plain text file which contains a Euclidean point clo
 			reader.onload = function(e) {
 				//console.log(reader.result);
 				var lines = reader.result.split(/[\r\n]+/g);
-				var Ps = [];
+				Ps = [];
 				for (var i = 0; i < lines.length; i++) {
 				    if (lines[i].length == 0) {
 				        break;
@@ -63,28 +68,17 @@ Click "browse" and upload a plain text file which contains a Euclidean point clo
 				else if (Ps[0].length == 3) {
 				    plotPC3D(Ps, "PointCloud");
 				}
-				
-				var cutoff = parseFloat(document.getElementById("dcutoff").value);
-				var homdim = parseInt(document.getElementById("homdim").value);
-				var ret = getRipsDGMs(Ps, cutoff, homdim);
-				var dgms = ret.dgms;
-				var elapsed = ret.elapsed;
-				document.getElementById("time").innerHTML = "Elapsed Time: " + elapsed + " seconds";
-				for (var i = 0; i < dgms.length; i++) {
-				    var dgmPoints = {x:dgms[i].births, y:dgms[i].deaths, mode:'markers', name:'points'};
-				    var axMin = Math.min(Math.min.apply(null, dgms[i].births), Math.min.apply(null, dgms[i].deaths));
-                    var axMax = Math.max(Math.max.apply(null, dgms[i].births), Math.max.apply(null, dgms[i].deaths));
-                    var axRange = axMax - axMin;
-				    var diagonal = {x:[axMin-axRange/5, axMax+axRange/5], y:[axMin-axRange/5, axMax+axRange/5], mode:'scatter', name:'diagonal'};
-				    var layout = {title:'H'+i};
-				    Plotly.newPlot('H'+i, [dgmPoints, diagonal], layout);
-				}
+				dgms = doComputation(Ps);
 			}
 			reader.readAsText(file);	
 		} else {
 			result.innerHTML = "File not supported!"
 		}
 	});
+	
+	function recompute() {
+	    doComputation(Ps);
+	}
 </script>
 
 
